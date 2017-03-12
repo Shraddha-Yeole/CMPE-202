@@ -1,6 +1,7 @@
 package javatouml.parsejava;
 
 import java.io.FileInputStream;
+import java.util.ArrayList;
 //import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -25,8 +27,6 @@ public class Classesparse {
 
 	public static void main(String[] args) throws Exception {
 		// creates an input stream for the file to be parsed
-		// FileInputStream in = new
-		// FileInputStream("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/A.java");
 		ClassTemplate javaClass = getCUnit(
 				new FileInputStream("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/A.java"));
 		ClassTemplate javaClass2 = getCUnit(
@@ -35,16 +35,14 @@ public class Classesparse {
 		Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
 		classes.put(javaClass.getClass_Name(), javaClass);
 		System.out.println("ca---"+javaClass.toString());
-		
+
 		int x = classes.size();
 		System.out.println("no of classes:" + x);
-		/*
-		 * List<ClassTemplate> classes1 = new ArrayList();
-		 * classes1.add(javaClass); classes1.add(javaClass2);
-		 * 
-		 * for (ClassTemplate class1 : classes) {
-		 * System.out.println(class1.getClass_Name()); }
-		 */
+
+		List<ClassTemplate> classes1 = new ArrayList();
+		classes1.add(javaClass); 
+		classes1.add(javaClass2);
+
 
 	}
 
@@ -58,7 +56,7 @@ public class Classesparse {
 			input.close();
 		}
 	}
-	/*Method to for parsing class type*/
+	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
 
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
@@ -71,10 +69,10 @@ public class Classesparse {
 				jClass.setClass_Name(n.getName().toString());
 				jClass.setInterface(n.isInterface());
 
-				/*
-				 * System.out.println("ClassName" + n.getName().toString());
-				 * System.out.println("MapValue" + jClass.getClass_Name());
-				 */
+
+				System.out.println("ClassName" + n.getName().toString());
+				System.out.println("MapValue" + jClass.getClass_Name());
+
 
 				jClass.setInterface(n.isInterface());
 
@@ -88,10 +86,10 @@ public class Classesparse {
 							Type l1 = vDeclar.getType();
 							SimpleName v4 = vDeclar.getName();
 
-							/*
-							 * System.out.println("Variable Name=>" + v4);
-							 * System.out.println("Variable Type=>" + l1);
-							 */
+
+							System.out.println("Variable Name=>" + v4);
+							System.out.println("Variable Type=>" + l1);
+
 
 						}
 						vType = var.getModifiers();
@@ -120,24 +118,42 @@ public class Classesparse {
 						}
 
 						jmethod.getModifiers();
-						
 
-						List<Parameter> param = ((MethodDeclaration) bDeclr).getParameters();
-						for (Parameter pm : param) {
-							System.out.println("parameter=>:" + pm.getName());
+						//Add constructors to MethodClass
 
-							
-							// MethodClass(jmethod.getName(),
-							// jmethod.getType().toString(),
-							// Modifier.toString(jmethod.getModifiers()));
+						if (bDeclr instanceof ConstructorDeclaration) {
+							ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
+
+							MethodClass method = new MethodClass(constr.getName().toString(),constr.getTypeParameters(),Modifier.getAccessSpecifier(method));
+							jClass.addMethod(method.getName(), method);
+
+							if (constr.getParameters() != null) {
+								for (Parameter param : constr.getParameters()) {
+									method.addParameter(new Variable(param.getId().getName(), param.getType().toString(), null, null));
+								}
+							}
+
+
+
+
+
+
+							List<Parameter> param = ((MethodDeclaration) bDeclr).getParameters();
+							for (Parameter pm : param) {
+								System.out.println("parameter=>:" + pm.getName());
+
+
+								// MethodClass(jmethod.getName(),
+								// jmethod.getType().toString(),
+								// Modifier.toString(jmethod.getModifiers()));
+
+							}
 
 						}
 
 					}
-
 				}
 			}
 		}
-	}
 
-}
+	}
