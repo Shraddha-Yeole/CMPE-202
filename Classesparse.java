@@ -3,6 +3,7 @@ package javatouml.parsejava;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 //import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -25,9 +26,20 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 public class Classesparse {
+	/*
+	 * String outputDir;
+	   String classpath;
 
-	
-		public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
+	public Classesparse(String classpath, String outputDir)
+	{
+		this.classpath = classpath;
+		this.outputDir = outputDir;
+	}
+	 */
+
+	Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
+
+	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
 		try {
 			CompilationUnit unit = JavaParser.parse(input);
 			ClassTemplate classModel = new ClassTemplate("");
@@ -37,10 +49,59 @@ public class Classesparse {
 			input.close();
 		}
 	}
-	
-	
+
+
+	public void parseClasses() throws Exception {
+		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/testcase");
+		File[] fileset = config.listFiles();
+		if (fileset != null) {
+			for (File javaFile : fileset) {
+				if (javaFile.isDirectory()) {
+					continue;
+				} else if (!(javaFile.getAbsolutePath().endsWith(".java"))) {
+					continue;
+				}
+
+				ClassTemplate javaClass = Classesparse.getCUnit(new FileInputStream(javaFile));
+				System.out.println("checkClassinmap=>"+javaClass.getClass_Name().toString());
+				classes.put(javaClass.getClass_Name(), javaClass);
+				System.out.println("mapval--->>"+Arrays.asList(classes));
+			}
+
+
+		}
+	}
+
+
+	public String getGrammer()
+	{
+		String grammer = "@startuml";
+		for (ClassTemplate classModel : classes.values()) {
+			grammer = grammer + "\n" + getClassGrammer(classModel);
+		}
+
+		grammer = grammer + "\n@enduml";
+		return grammer;
+	}
+
+
+	public String getClassGrammer(ClassTemplate classModel) {
+		String grammer = "";
+		if (classModel.isInterface()) {
+			grammer = grammer + "interface " + classModel.getClass_Name();
+		} else {
+			grammer = grammer + "class " + classModel.getClass_Name();
+		}
+
+		System.out.println("grammer--->"+grammer);
+		return grammer;
+	}
+
+
+
+
 	/*Method  for parsing class type*/
- public static class ClassVisitor extends VoidVisitorAdapter {
+	public static class ClassVisitor extends VoidVisitorAdapter {
 
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 			if (arg instanceof ClassTemplate) {
@@ -63,7 +124,7 @@ public class Classesparse {
 				//System.out.println("bodylist"+n.getMembers());
 
 				for (BodyDeclaration bDeclr : bDeclrs)
-	{
+				{
 					if (bDeclr instanceof FieldDeclaration) {
 						FieldDeclaration var = (FieldDeclaration) bDeclr;
 						List<VariableDeclarator> vDeclars = var.getVariables();
@@ -90,7 +151,7 @@ public class Classesparse {
 						System.out.println("MethodName=>" + jmethod.getName());
 						// SimpleName meth_name = ((MethodDeclaration)
 						// bDeclr).getName();
-						 System.out.println("MethodReturn_Type=>"+jmethod.getType());
+						System.out.println("MethodReturn_Type=>"+jmethod.getType());
 						EnumSet<Modifier> methmod = jmethod.getModifiers();
 						for (Modifier mod1 : methmod) {
 							AccessSpecifier m5 = Modifier.getAccessSpecifier(methmod);
