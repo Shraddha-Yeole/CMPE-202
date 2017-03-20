@@ -1,7 +1,12 @@
 package javatouml.parsejava;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 //import java.util.ArrayList;
@@ -9,6 +14,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.AccessSpecifier;
@@ -24,6 +31,8 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+
+import net.sourceforge.plantuml.SourceStringReader;
 
 public class Classesparse {
 	/*
@@ -99,6 +108,19 @@ public class Classesparse {
 
 
 
+public void viewClassDiagram(String grammer) throws IOException {
+        ByteArrayOutputStream boutStram = new ByteArrayOutputStream();
+        SourceStringReader reader = new SourceStringReader(grammer);
+        String gdesc = reader.generateImage(boutStram);
+        byte[] byteArray = boutStram.toByteArray();
+        InputStream input = new ByteArrayInputStream(byteArray);
+        BufferedImage img = ImageIO.read(input);
+        ImageIO.write(img, "png", new File("/Users/shraddhayeole/Desktop/testoutput" + ".png"));
+        System.out.println(gdesc);
+    }
+	
+	
+	
 
 	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
@@ -195,3 +217,4 @@ public class Classesparse {
 	}//class visitor
 
 }//classes parse
+
