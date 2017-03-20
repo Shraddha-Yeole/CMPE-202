@@ -9,6 +9,8 @@ public class JavaparserInput {
 		System.out.println("IntermediateGrammer");
 		String g1=c.getGrammer();
 		System.out.println("PlantUMLGrammer=>\n\n"+g1);
+		System.out.println("Generate Digrame");
+		c.viewClassDiagram(g1);
 
 	}	
 
