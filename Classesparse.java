@@ -153,6 +153,14 @@ public void viewClassDiagram(String grammer) throws IOException {
 						for (VariableDeclarator vDeclar : vDeclars) {
 							Type l1 = vDeclar.getType();
 							SimpleName v4 = vDeclar.getName();
+							vType = var.getModifiers().toString();
+						if (var.getModifiers().toString().compareToIgnoreCase("public")==0)
+							modifier = "+";
+						else if (var.getModifiers().toString().compareToIgnoreCase("[private]")==0)
+							modifier = "-";
+						else
+							modifier = "#";
+							
 
 
 							System.out.println("Variable Name=>" + v4);
