@@ -2,14 +2,22 @@ package javatouml.parsejava;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import java.util.HashMap;
 import java.util.Map;
+//import com.github.javaparser.ast.Modifier;
+
+//import com.github.javaparser.ast.type.Type;
 
 public class ClassTemplate {
 
 	private String class_Name;
 	private String extendz;
 	private boolean isInterface = false;
+	
+	private Collection<String> interfaces = new ArrayList<String>();
+	private Map<String, MethodClass> methodMap = new HashMap<String, MethodClass>();
+	Map<String, VariableInfo> varmap= new HashMap<String, VariableInfo>();
 	
 	public ClassTemplate(String class_Name) {
 		
@@ -24,9 +32,7 @@ public class ClassTemplate {
 		this.class_Name = class_Name;
 	}
 	
-	private Collection<String> interfaces = new ArrayList<String>();
-	private Map<String, VariableInfo> varMap = new HashMap<String, VariableInfo>();
-	private Map<String, MethodClass> methodMap = new HashMap<String, MethodClass>();
+	
 
 	public String getExtendz() {
 		return extendz;
@@ -59,18 +65,15 @@ public class ClassTemplate {
 		interfaces.add(name);
 	}
 	
-	public Map<String, VariableInfo> getVarMap() {
-		return varMap;
+	/*
+	public  void setVariables(Map<String, VariableInfo> variables) {
+		variablemap = variables;
 	}
 
-	public void setVarMap(Map<String, VariableInfo> varMap) {
-		this.varMap = varMap;
+	public  void addVariable(String vName, VariableInfo variable) {
+		variablemap.put(vName, variable);
 	}
-
-	public void addVariable(String vName, VariableInfo variable) {
-		varMap.put(vName, variable);
-	}
-	
+	*/
 	
 	public Map<String, MethodClass> getMethodMap() {
 		return methodMap;
@@ -83,6 +86,14 @@ public class ClassTemplate {
 	public void addMethod(String mName, MethodClass method) {
 		methodMap.put(mName, method);
 	}
+
+	/*
+	public Collection<VariableInfo> getVariables() {
+		
+		return variablemap.values();
+	}
+
+*/	
 	
 	
 	
@@ -94,3 +105,4 @@ public class ClassTemplate {
 	
 	
 }
+
