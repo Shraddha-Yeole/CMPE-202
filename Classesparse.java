@@ -7,8 +7,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
+//import java.util.ArrayList;
+//import java.util.Arrays;
 //import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -23,13 +24,14 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
+//import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.ReferenceType;
+//import com.github.javaparser.ast.expr.SimpleName;
+//import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import net.sourceforge.plantuml.SourceStringReader;
@@ -46,7 +48,9 @@ public class Classesparse {
 	}
 	 */
 
-	Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
+	 static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
+	
+	
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
 		try {
@@ -72,9 +76,10 @@ public class Classesparse {
 				}
 
 				ClassTemplate javaClass = Classesparse.getCUnit(new FileInputStream(javaFile));
-				System.out.println("checkClassinmap=>"+javaClass.getClass_Name().toString());
-				classes.put(javaClass.getClass_Name(), javaClass);
-				System.out.println("mapval--->>"+Arrays.asList(classes));
+				//System.out.println("checkClassinmap=>"+javaClass.getClass_Name().toString());
+				//System.out.println("classtemplate"+javaClass);
+				//classes.put(javaClass.getClass_Name(), javaClass);
+				//System.out.println("mapval--->>"+Arrays.asList(classes));
 			}
 
 
@@ -84,9 +89,9 @@ public class Classesparse {
 
 	public String getGrammer()
 	{
-		String grammer = "@startuml";
+		String grammer = "@startuml" +"skinparam classAttributeIconSize 0";
 		for (ClassTemplate classModel : classes.values()) {
-			grammer = grammer + "\n" + getClassGrammer(classModel);
+			grammer = grammer + "\n" + getClassGrammer(classModel) ;
 		}
 
 		grammer = grammer + "\n@enduml";
@@ -96,33 +101,46 @@ public class Classesparse {
 
 	public String getClassGrammer(ClassTemplate classModel) {
 		String grammer = "";
+		String modifier;
 		if (classModel.isInterface()) {
 			grammer = grammer + "interface " + classModel.getClass_Name();
 		} else {
-			grammer = grammer + "class " + classModel.getClass_Name();
-		}
+			grammer = grammer + "class " + classModel.getClass_Name()+"{";
+			
+			for(VariableInfo vn :classModel.varmap.values())
+			{
+				
+				if (vn.getAccess_modifier().toString().compareToIgnoreCase("public")==0)
+					modifier = "+";
+				else if (vn.getAccess_modifier().toString().compareToIgnoreCase("[private]")==0)
+					modifier = "-";
+				else
+					modifier = "#";
 
-		System.out.println("grammer--->"+grammer);
+				grammer = grammer +"\n"+modifier+vn.getName()+":"+vn.getData_type();
+			}
+			
+			
+		}
+		
+		grammer = grammer+"\n"+"}";
+		System.out.println(grammer);
 		return grammer;
 	}
 
-
-
 public void viewClassDiagram(String grammer) throws IOException {
-        ByteArrayOutputStream boutStram = new ByteArrayOutputStream();
-        SourceStringReader reader = new SourceStringReader(grammer);
-        String gdesc = reader.generateImage(boutStram);
-        byte[] byteArray = boutStram.toByteArray();
-        InputStream input = new ByteArrayInputStream(byteArray);
-        BufferedImage img = ImageIO.read(input);
-        ImageIO.write(img, "png", new File("/Users/shraddhayeole/Desktop/testoutput" + ".png"));
-        System.out.println(gdesc);
-    }
-	
-	
-	
+		ByteArrayOutputStream boutStram = new ByteArrayOutputStream();
+		SourceStringReader reader = new SourceStringReader(grammer);
+		String gdesc = reader.generateImage(boutStram);
+		byte[] byteArray = boutStram.toByteArray();
+		InputStream input = new ByteArrayInputStream(byteArray);
+		BufferedImage img = ImageIO.read(input);
+		ImageIO.write(img, "png", new File("/Users/shraddhayeole/Desktop/testoutput" + ".png"));
+		System.out.println(gdesc);
+	}
 
-	/*Method  for parsing class type*/
+
+/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
 
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
@@ -130,57 +148,54 @@ public void viewClassDiagram(String grammer) throws IOException {
 
 				ClassTemplate jClass = (ClassTemplate) arg;
 
-				EnumSet<Modifier> vType;
+				String vType;
+				String modifier ="";
 				String vName, initValue = null;
 				jClass.setClass_Name(n.getName().toString());
 				jClass.setInterface(n.isInterface());
 
 				System.out.println("----------------------------");
-				System.out.println("ClassName=>" + n.getName().toString());
-				//System.out.println("MapValue" + jClass.getClass_Name());
-
-
+				System.out.println("ClassName=>" + n.getName().toString()); 
+				
 				jClass.setInterface(n.isInterface());
 
 				List<BodyDeclaration<?>> bDeclrs = n.getMembers();
-				//System.out.println("bodylist"+n.getMembers());
-
+				String l1 = null,v4 = null;
 				for (BodyDeclaration bDeclr : bDeclrs)
 				{
 					if (bDeclr instanceof FieldDeclaration) {
 						FieldDeclaration var = (FieldDeclaration) bDeclr;
+						VariableInfo vi= new VariableInfo("", "", "");
 						List<VariableDeclarator> vDeclars = var.getVariables();
+						vType = var.getModifiers().toString();
+						
+						System.out.println("Variable Modifier=>" + vType);
+						
+
 						for (VariableDeclarator vDeclar : vDeclars) {
-							Type l1 = vDeclar.getType();
-							SimpleName v4 = vDeclar.getName();
-							vType = var.getModifiers().toString();
-						if (var.getModifiers().toString().compareToIgnoreCase("public")==0)
-							modifier = "+";
-						else if (var.getModifiers().toString().compareToIgnoreCase("[private]")==0)
-							modifier = "-";
-						else
-							modifier = "#";
-							
-
-
-							System.out.println("Variable Name=>" + v4);
-							System.out.println("Variable data_Type=>" + l1);
-
+							l1 = vDeclar.getType().toString();
+							v4 = vDeclar.getName().toString();
 
 						}
-						vType = var.getModifiers();
-						System.out.println("Variable Modifier=>" + vType);
-						// jClass.addVariable(v4, new
-						// VariableInfo(v4,l1,,vType));
+						System.out.println("Variable Name=>" + v4);
+						vi.setName(v4);
+						System.out.println("Variable data_Type=>" + l1);
+						vi.setData_type(l1);
+						vi.setAccess_modifier(vType);
+						
 
+						if (var.getVariables().get(0).getInitializer() != null)
+							initValue = var.getVariables().get(0).getInitializer().toString();
+						
+						
+						jClass.varmap.put(vi.getName(),vi);
+						
 					}
 
 					if (bDeclr instanceof MethodDeclaration) {
 						MethodDeclaration jmethod = (MethodDeclaration) bDeclr;
 
 						System.out.println("MethodName=>" + jmethod.getName());
-						// SimpleName meth_name = ((MethodDeclaration)
-						// bDeclr).getName();
 						System.out.println("MethodReturn_Type=>"+jmethod.getType());
 						EnumSet<Modifier> methmod = jmethod.getModifiers();
 						for (Modifier mod1 : methmod) {
@@ -195,22 +210,6 @@ public void viewClassDiagram(String grammer) throws IOException {
 
 						jmethod.getModifiers();
 
-						//Add constructors to MethodClass
-						/**
-						if (bDeclr instanceof ConstructorDeclaration) {
-							ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
-
-							MethodClass method = new MethodClass(constr.getName().toString(),constr.getTypeParameters(),Modifier.getAccessSpecifier(method));
-							jClass.addMethod(method.getName(), method);
-
-							if (constr.getParameters() != null) {
-								for (Parameter param : constr.getParameters()) {
-									method.addParameter(new Variable(param.getId().getName(), param.getType().toString(), null, null));
-								}
-							}
-
-
-						 **/
 						List<Parameter> param = ((MethodDeclaration) bDeclr).getParameters();
 						for (Parameter pm : param) {
 							System.out.println("Method_parameter=>:" + pm.getName());
@@ -219,10 +218,15 @@ public void viewClassDiagram(String grammer) throws IOException {
 
 					} //end of method declaration
 
-				} //end of body declaration
+				} //end of body declaration for loop
+				
 			}
+			
+			classes.put(n.getName().toString(), (ClassTemplate) arg);
+			//System.out.println("mapval--->>"+Arrays.asList(classes));
+			//System.out.println(classes.values());
+			
 		}//void visit
 	}//class visitor
 
 }//classes parse
-
