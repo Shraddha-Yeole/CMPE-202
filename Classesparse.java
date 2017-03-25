@@ -30,6 +30,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.type.ReferenceType;
+import com.github.javaparser.ast.type.Type;
 //import com.github.javaparser.ast.expr.SimpleName;
 //import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -48,9 +49,9 @@ public class Classesparse {
 	}
 	 */
 
-	 static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
-	
-	
+	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
+
+
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
 		try {
@@ -89,7 +90,7 @@ public class Classesparse {
 
 	public String getGrammer()
 	{
-		String grammer = "@startuml" +"skinparam classAttributeIconSize 0";
+		String grammer = "@startuml"+"\n" + "skinparam classAttributeIconSize 0" + "\n" ;
 		for (ClassTemplate classModel : classes.values()) {
 			grammer = grammer + "\n" + getClassGrammer(classModel) ;
 		}
@@ -106,29 +107,22 @@ public class Classesparse {
 			grammer = grammer + "interface " + classModel.getClass_Name();
 		} else {
 			grammer = grammer + "class " + classModel.getClass_Name()+"{";
-			
+
 			for(VariableInfo vn :classModel.varmap.values())
 			{
-				
-				if (vn.getAccess_modifier().toString().compareToIgnoreCase("public")==0)
-					modifier = "+";
-				else if (vn.getAccess_modifier().toString().compareToIgnoreCase("[private]")==0)
-					modifier = "-";
-				else
-					modifier = "#";
 
-				grammer = grammer +"\n"+modifier+vn.getName()+":"+vn.getData_type();
+				grammer = grammer +"\n"+vn.getAccess_modifier()+vn.getName()+":"+vn.getData_type();
 			}
-			
-			
+
+
 		}
-		
+
 		grammer = grammer+"\n"+"}";
 		System.out.println(grammer);
 		return grammer;
 	}
 
-public void viewClassDiagram(String grammer) throws IOException {
+	public void viewClassDiagram(String grammer) throws IOException {
 		ByteArrayOutputStream boutStram = new ByteArrayOutputStream();
 		SourceStringReader reader = new SourceStringReader(grammer);
 		String gdesc = reader.generateImage(boutStram);
@@ -140,7 +134,7 @@ public void viewClassDiagram(String grammer) throws IOException {
 	}
 
 
-/*Method  for parsing class type*/
+	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
 
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
@@ -156,11 +150,12 @@ public void viewClassDiagram(String grammer) throws IOException {
 
 				System.out.println("----------------------------");
 				System.out.println("ClassName=>" + n.getName().toString()); 
-				
+
 				jClass.setInterface(n.isInterface());
 
 				List<BodyDeclaration<?>> bDeclrs = n.getMembers();
-				String l1 = null,v4 = null;
+				Type l1 = null;
+				String v4 = null;
 				for (BodyDeclaration bDeclr : bDeclrs)
 				{
 					if (bDeclr instanceof FieldDeclaration) {
@@ -168,28 +163,53 @@ public void viewClassDiagram(String grammer) throws IOException {
 						VariableInfo vi= new VariableInfo("", "", "");
 						List<VariableDeclarator> vDeclars = var.getVariables();
 						vType = var.getModifiers().toString();
-						
-						System.out.println("Variable Modifier=>" + vType);
-						
+
+						//System.out.println("Variable Modifier=>" + vType);
+
+						if (var.getModifiers().toString().compareToIgnoreCase("public")==0)
+							modifier = "+";
+						else if (var.getModifiers().toString().compareToIgnoreCase("[private]")==0)
+							modifier = "-";
+						else
+							modifier = "#";
+
+
 
 						for (VariableDeclarator vDeclar : vDeclars) {
-							l1 = vDeclar.getType().toString();
+							l1 = vDeclar.getType();
 							v4 = vDeclar.getName().toString();
 
-						}
-						System.out.println("Variable Name=>" + v4);
-						vi.setName(v4);
-						System.out.println("Variable data_Type=>" + l1);
-						vi.setData_type(l1);
-						vi.setAccess_modifier(vType);
-						
 
+							if (vDeclar.getType() instanceof ReferenceType)
+							{
+
+								if (vDeclar.getType().toString().contains("[]"))
+								{
+									System.out.println("Variable Name=>" + v4);
+									vi.setName(v4);
+									System.out.println("Variable data_Type=>" + l1);
+									vi.setData_type(l1.toString());
+									vi.setAccess_modifier(modifier);
+									jClass.varmap.put(vi.getName(), vi);
+								}
+								//jClass.varmap.put(vi.getName(), vi);
+
+							}else{
+
+								System.out.println("Variable Name=>" + v4);
+								vi.setName(v4);
+								System.out.println("Variable data_Type=>" + l1);
+								vi.setData_type(l1.toString());
+								vi.setAccess_modifier(modifier);
+
+								jClass.varmap.put(vi.getName(), vi);
+
+							}
+							//jClass.varmap.put(vi.getName(),vi);
+						}
 						if (var.getVariables().get(0).getInitializer() != null)
 							initValue = var.getVariables().get(0).getInitializer().toString();
-						
-						
-						jClass.varmap.put(vi.getName(),vi);
-						
+
 					}
 
 					if (bDeclr instanceof MethodDeclaration) {
@@ -219,13 +239,13 @@ public void viewClassDiagram(String grammer) throws IOException {
 					} //end of method declaration
 
 				} //end of body declaration for loop
-				
+
 			}
-			
+
 			classes.put(n.getName().toString(), (ClassTemplate) arg);
 			//System.out.println("mapval--->>"+Arrays.asList(classes));
 			//System.out.println(classes.values());
-			
+
 		}//void visit
 	}//class visitor
 
