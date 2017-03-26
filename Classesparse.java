@@ -13,8 +13,10 @@ import java.util.Arrays;
 //import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -50,7 +52,8 @@ public class Classesparse {
 	 */
 
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
-
+	
+	
 
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
@@ -137,10 +140,13 @@ public class Classesparse {
 	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
 
+		ClassTemplate jClass1= new ClassTemplate(null);
+		
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 			if (arg instanceof ClassTemplate) {
 
 				ClassTemplate jClass = (ClassTemplate) arg;
+				ClassTemplate.refervariable =  new HashSet();
 
 				String vType;
 				String modifier ="";
@@ -193,7 +199,8 @@ public class Classesparse {
 									jClass.varmap.put(vi.getName(), vi);
 								}
 								//jClass.varmap.put(vi.getName(), vi);
-
+								jClass.refervariable.add(vDeclar.getType().toString());
+									
 							}else{
 
 								System.out.println("Variable Name=>" + v4);
@@ -240,9 +247,14 @@ public class Classesparse {
 
 				} //end of body declaration for loop
 
+				
+				
 			}
-
+			//System.out.println(n.getName().toString());
 			classes.put(n.getName().toString(), (ClassTemplate) arg);
+			jClass1.refvarmap.put(n.getName().toString(), jClass1.refervariable);
+			System.out.println("mapval--->>"+Arrays.asList(jClass1.refvarmap));
+			
 			//System.out.println("mapval--->>"+Arrays.asList(classes));
 			//System.out.println(classes.values());
 
