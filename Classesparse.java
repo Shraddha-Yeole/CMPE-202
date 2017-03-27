@@ -121,7 +121,8 @@ public class Classesparse {
 		}
 
 		grammer = grammer+"\n"+"}";
-		System.out.println(grammer);
+		//System.out.println(grammer);
+		
 		return grammer;
 	}
 
@@ -136,6 +137,16 @@ public class Classesparse {
 		System.out.println(gdesc);
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
@@ -199,8 +210,18 @@ public class Classesparse {
 									jClass.varmap.put(vi.getName(), vi);
 								}
 								//jClass.varmap.put(vi.getName(), vi);
+								
+								else if(vDeclar.getType().toString().contains("Collection"))
+								{
+									String checkcollection=vDeclar.getType().toString();
+									String result=checkcollection.substring(checkcollection.indexOf("<")+1,checkcollection.indexOf(">"));
+									System.out.println("result"+result);
+									jClass.refervariable.add(result);
+								}
+								else 
+								{
 								jClass.refervariable.add(vDeclar.getType().toString());
-									
+								}	
 							}else{
 
 								System.out.println("Variable Name=>" + v4);
