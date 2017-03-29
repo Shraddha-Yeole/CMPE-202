@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
 //import java.util.ArrayList;
 //import java.util.Arrays;
 //import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class Classesparse {
 
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
 	
-	
+	Set <String> varrelation= new HashSet<String>();
 
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
@@ -93,15 +94,61 @@ public class Classesparse {
 
 	public String getGrammer()
 	{
+		
 		String grammer = "@startuml"+"\n" + "skinparam classAttributeIconSize 0" + "\n" ;
 		for (ClassTemplate classModel : classes.values()) {
-			grammer = grammer + "\n" + getClassGrammer(classModel) ;
+			
+			
+			grammer = grammer + "\n" + getClassGrammer(classModel)+"\n";
+			checkRelationship(classModel);
+		
 		}
-
-		grammer = grammer + "\n@enduml";
+		
+		System.out.println("varrelation"+varrelation);
+			
+			
+		for(String s3:varrelation)
+		{
+			System.out.println(s3);
+			grammer = grammer + s3+"\n";
+		}
+		
+		
+		
+		grammer = grammer+ "\n@enduml";
+		//grammer=grammer;
 		return grammer;
 	}
 
+	public void checkRelationship(ClassTemplate classModel){
+		
+		String e="";
+	
+		Set<String> s= classModel.refvarmap.get(classModel.getClass_Name());
+
+			for(String s2: s)
+			{
+			
+				 e=classModel.getClass_Name()+"--"+s2;
+				String erev=new StringBuffer(e).reverse().toString();
+			
+				if(varrelation.contains(erev))
+				{
+					//System.out.println("do nothing");
+				}
+				else
+				{
+					System.out.println(classModel.getClass_Name()+"---"+s2);
+					varrelation.add(e);
+					
+					
+				}
+			}
+		
+	}
+	
+	
+	
 
 	public String getClassGrammer(ClassTemplate classModel) {
 		String grammer = "";
@@ -116,14 +163,20 @@ public class Classesparse {
 
 				grammer = grammer +"\n"+vn.getAccess_modifier()+vn.getName()+":"+vn.getData_type();
 			}
-
+			
+			
 
 		}
 
 		grammer = grammer+"\n"+"}";
 		//System.out.println(grammer);
 		
+		
+		
 		return grammer;
+		
+		
+		
 	}
 
 	public void viewClassDiagram(String grammer) throws IOException {
@@ -151,7 +204,7 @@ public class Classesparse {
 	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
 
-		ClassTemplate jClass1= new ClassTemplate(null);
+		//ClassTemplate jClass1= new ClassTemplate(null);
 		
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 			if (arg instanceof ClassTemplate) {
@@ -267,14 +320,15 @@ public class Classesparse {
 					} //end of method declaration
 
 				} //end of body declaration for loop
-
-				
+				//classes.put(n.getName().toString(), (ClassTemplate) arg);
+				jClass.refvarmap.put(n.getName().toString(), jClass.refervariable);
+				classes.put(n.getName().toString(), jClass);
+				System.out.println("mapval--->>"+Arrays.asList(jClass.refvarmap));
+				System.out.println(jClass.refvarmap.values());
 				
 			}
 			//System.out.println(n.getName().toString());
-			classes.put(n.getName().toString(), (ClassTemplate) arg);
-			jClass1.refvarmap.put(n.getName().toString(), jClass1.refervariable);
-			System.out.println("mapval--->>"+Arrays.asList(jClass1.refvarmap));
+			
 			
 			//System.out.println("mapval--->>"+Arrays.asList(classes));
 			//System.out.println(classes.values());
@@ -283,3 +337,4 @@ public class Classesparse {
 	}//class visitor
 
 }//classes parse
+
