@@ -41,19 +41,10 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import net.sourceforge.plantuml.SourceStringReader;
 
 public class Classesparse {
-	/*
-	 * String outputDir;
-	   String classpath;
-
-	public Classesparse(String classpath, String outputDir)
-	{
-		this.classpath = classpath;
-		this.outputDir = outputDir;
-	}
-	 */
+	
 
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
-	
+
 	Set <String> varrelation= new HashSet<String>();
 
 
@@ -81,10 +72,7 @@ public class Classesparse {
 				}
 
 				ClassTemplate javaClass = Classesparse.getCUnit(new FileInputStream(javaFile));
-				//System.out.println("checkClassinmap=>"+javaClass.getClass_Name().toString());
-				//System.out.println("classtemplate"+javaClass);
-				//classes.put(javaClass.getClass_Name(), javaClass);
-				//System.out.println("mapval--->>"+Arrays.asList(classes));
+
 			}
 
 
@@ -94,65 +82,64 @@ public class Classesparse {
 
 	public String getGrammer()
 	{
-		
+
 		String grammer = "@startuml"+"\n" + "skinparam classAttributeIconSize 0" + "\n" ;
 		for (ClassTemplate classModel : classes.values()) {
-			
-			
+
+
 			grammer = grammer + "\n" + getClassGrammer(classModel)+"\n";
 			checkRelationship(classModel);
-		
+
 		}
-		
+
 		System.out.println("varrelation"+varrelation);
-			
-			
+
+
 		for(String s3:varrelation)
 		{
 			System.out.println(s3);
 			grammer = grammer + s3+"\n";
 		}
-		
-		
-		
+
+
+
 		grammer = grammer+ "\n@enduml";
-		//grammer=grammer;
 		return grammer;
 	}
 
 	public void checkRelationship(ClassTemplate classModel){
-		
+
 		String e="";
-	
+
 		Set<String> s= classModel.refvarmap.get(classModel.getClass_Name());
 
-			for(String s2: s)
+		for(String s2: s)
+		{
+
+			e=classModel.getClass_Name()+"--"+s2;
+			String erev=new StringBuffer(e).reverse().toString();
+
+			if(varrelation.contains(erev))
 			{
-			
-				 e=classModel.getClass_Name()+"--"+s2;
-				String erev=new StringBuffer(e).reverse().toString();
-			
-				if(varrelation.contains(erev))
-				{
-					//System.out.println("do nothing");
-				}
-				else
-				{
-					System.out.println(classModel.getClass_Name()+"---"+s2);
-					varrelation.add(e);
-					
-					
-				}
+				//System.out.println("do nothing");
 			}
-		
+			else
+			{
+				System.out.println(classModel.getClass_Name()+"---"+s2);
+				varrelation.add(e);
+
+
+			}
+		}
+
 	}
-	
-	
-	
+
+
+
 
 	public String getClassGrammer(ClassTemplate classModel) {
 		String grammer = "";
-		String modifier;
+
 		if (classModel.isInterface()) {
 			grammer = grammer + "interface " + classModel.getClass_Name();
 		} else {
@@ -163,20 +150,14 @@ public class Classesparse {
 
 				grammer = grammer +"\n"+vn.getAccess_modifier()+vn.getName()+":"+vn.getData_type();
 			}
-			
-			
+
+
 
 		}
 
 		grammer = grammer+"\n"+"}";
-		//System.out.println(grammer);
-		
-		
-		
-		return grammer;
-		
-		
-		
+
+	return grammer;
 	}
 
 	public void viewClassDiagram(String grammer) throws IOException {
@@ -190,22 +171,11 @@ public class Classesparse {
 		System.out.println(gdesc);
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
 	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
 
 		//ClassTemplate jClass1= new ClassTemplate(null);
-		
+
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 			if (arg instanceof ClassTemplate) {
 
@@ -234,8 +204,6 @@ public class Classesparse {
 						List<VariableDeclarator> vDeclars = var.getVariables();
 						vType = var.getModifiers().toString();
 
-						//System.out.println("Variable Modifier=>" + vType);
-
 						if (var.getModifiers().toString().compareToIgnoreCase("public")==0)
 							modifier = "+";
 						else if (var.getModifiers().toString().compareToIgnoreCase("[private]")==0)
@@ -262,8 +230,8 @@ public class Classesparse {
 									vi.setAccess_modifier(modifier);
 									jClass.varmap.put(vi.getName(), vi);
 								}
-								//jClass.varmap.put(vi.getName(), vi);
-								
+							
+
 								else if(vDeclar.getType().toString().contains("Collection"))
 								{
 									String checkcollection=vDeclar.getType().toString();
@@ -273,7 +241,7 @@ public class Classesparse {
 								}
 								else 
 								{
-								jClass.refervariable.add(vDeclar.getType().toString());
+									jClass.refervariable.add(vDeclar.getType().toString());
 								}	
 							}else{
 
@@ -286,7 +254,7 @@ public class Classesparse {
 								jClass.varmap.put(vi.getName(), vi);
 
 							}
-							//jClass.varmap.put(vi.getName(),vi);
+							
 						}
 						if (var.getVariables().get(0).getInitializer() != null)
 							initValue = var.getVariables().get(0).getInitializer().toString();
@@ -320,16 +288,16 @@ public class Classesparse {
 					} //end of method declaration
 
 				} //end of body declaration for loop
-				//classes.put(n.getName().toString(), (ClassTemplate) arg);
+				
 				jClass.refvarmap.put(n.getName().toString(), jClass.refervariable);
 				classes.put(n.getName().toString(), jClass);
 				System.out.println("mapval--->>"+Arrays.asList(jClass.refvarmap));
 				System.out.println(jClass.refvarmap.values());
-				
+
 			}
 			//System.out.println(n.getName().toString());
-			
-			
+
+
 			//System.out.println("mapval--->>"+Arrays.asList(classes));
 			//System.out.println(classes.values());
 
