@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collection;
 //import java.util.ArrayList;
 //import java.util.Arrays;
 //import java.util.ArrayList;
@@ -39,13 +38,15 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import net.sourceforge.plantuml.SourceStringReader;
+import net.sourceforge.plantuml.core.DiagramDescription;
 
 public class Classesparse {
-	
+
 
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
 
 	Set <String> varrelation= new HashSet<String>();
+	Set <String> varcollection=new HashSet<String>();
 
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
@@ -110,29 +111,60 @@ public class Classesparse {
 	public void checkRelationship(ClassTemplate classModel){
 
 		String e="";
+		String f="";
+		String g="";
 
 		Set<String> s= classModel.refvarmap.get(classModel.getClass_Name());
+		System.out.println("set"+s);
 
 		for(String s2: s)
 		{
 
-			e=classModel.getClass_Name()+"--"+s2;
-			String erev=new StringBuffer(e).reverse().toString();
-
-			if(varrelation.contains(erev))
+			if (s2.contains("Collection"))
 			{
-				//System.out.println("do nothing");
+				String result=s2.substring(s2.indexOf("<")+1,s2.indexOf(">"));
+				System.out.println("result"+result);
+				e=classModel.getClass_Name()+result;
+				System.out.println("EE"+e);
+				String erev=new StringBuffer(e).reverse().toString();
+				if(varcollection.contains(erev))
+				{
+					//System.out.println("do nothing");
+				}
+				else
+				{
+
+					f=classModel.getClass_Name()+"\""+"1"+"\""+"---"+"\""+"*"+"\""+result;
+					varrelation.add(f);
+					varcollection.add(e);
+				}
 			}
 			else
 			{
-				System.out.println(classModel.getClass_Name()+"---"+s2);
-				varrelation.add(e);
+				e=classModel.getClass_Name()+s2;
+				System.out.println("EE"+e);
+				String erev=new StringBuffer(e).reverse().toString();
+				if(varcollection.contains(erev))
+				{
+					//System.out.println("do nothing");
+				}
+				else
+				{
 
+					f=classModel.getClass_Name()+"\""+"1"+"\""+"---"+"\""+"1"+"\""+s2;
+					varrelation.add(f);
+					varcollection.add(e);
+				}	
+			}	
 
-			}
 		}
-
 	}
+
+
+
+
+
+
 
 
 
@@ -157,13 +189,13 @@ public class Classesparse {
 
 		grammer = grammer+"\n"+"}";
 
-	return grammer;
+		return grammer;
 	}
 
 	public void viewClassDiagram(String grammer) throws IOException {
 		ByteArrayOutputStream boutStram = new ByteArrayOutputStream();
 		SourceStringReader reader = new SourceStringReader(grammer);
-		String gdesc = reader.generateImage(boutStram);
+		DiagramDescription gdesc = reader.generateImage(boutStram);
 		byte[] byteArray = boutStram.toByteArray();
 		InputStream input = new ByteArrayInputStream(byteArray);
 		BufferedImage img = ImageIO.read(input);
@@ -230,15 +262,15 @@ public class Classesparse {
 									vi.setAccess_modifier(modifier);
 									jClass.varmap.put(vi.getName(), vi);
 								}
-							
 
+								/*
 								else if(vDeclar.getType().toString().contains("Collection"))
 								{
 									String checkcollection=vDeclar.getType().toString();
 									String result=checkcollection.substring(checkcollection.indexOf("<")+1,checkcollection.indexOf(">"));
 									System.out.println("result"+result);
 									jClass.refervariable.add(result);
-								}
+								}*/
 								else 
 								{
 									jClass.refervariable.add(vDeclar.getType().toString());
@@ -254,7 +286,7 @@ public class Classesparse {
 								jClass.varmap.put(vi.getName(), vi);
 
 							}
-							
+
 						}
 						if (var.getVariables().get(0).getInitializer() != null)
 							initValue = var.getVariables().get(0).getInitializer().toString();
@@ -288,7 +320,7 @@ public class Classesparse {
 					} //end of method declaration
 
 				} //end of body declaration for loop
-				
+
 				jClass.refvarmap.put(n.getName().toString(), jClass.refervariable);
 				classes.put(n.getName().toString(), jClass);
 				System.out.println("mapval--->>"+Arrays.asList(jClass.refvarmap));
