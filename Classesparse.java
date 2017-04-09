@@ -222,6 +222,16 @@ public class Classesparse {
 					}
 				}
 
+				List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
+				if (implementz != null) {
+					for (int i = 0; i < implementz.size(); i++) {
+						jClass.addInterface(implementz.get(i).getName().toString());
+						System.out.println("implement"+implementz.get(i).getName().toString());
+					}
+				}
+
+
+
 				System.out.println("----------------------------");
 				System.out.println("ClassName=>" + n.getName().toString()); 
 
@@ -337,6 +347,5 @@ public class Classesparse {
 	}//class visitor
 
 }//classes parse
-
 
 
