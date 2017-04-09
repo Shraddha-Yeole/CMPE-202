@@ -206,6 +206,11 @@ public class Classesparse {
 				ClassTemplate jClass = (ClassTemplate) arg;
 				ClassTemplate.refervariable =  new HashSet();
 
+				/*if (bDeclr instanceof ConstructorDeclaration) {
+                    ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
+                    */
+				
+				
 				String vType;
 				String modifier ="";
 				String vName, initValue = null;
