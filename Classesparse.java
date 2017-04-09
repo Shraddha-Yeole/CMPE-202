@@ -31,6 +31,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
 //import com.github.javaparser.ast.expr.SimpleName;
@@ -62,7 +63,7 @@ public class Classesparse {
 
 
 	public void parseClasses() throws Exception {
-		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/testcase");
+		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/testcase2");
 		File[] fileset = config.listFiles();
 		if (fileset != null) {
 			for (File javaFile : fileset) {
@@ -93,7 +94,7 @@ public class Classesparse {
 
 		}
 
-		System.out.println("varrelation"+varrelation);
+		//System.out.println("varrelation"+varrelation);
 
 
 		for(String s3:varrelation)
@@ -115,7 +116,7 @@ public class Classesparse {
 		String g="";
 
 		Set<String> s= classModel.refvarmap.get(classModel.getClass_Name());
-		System.out.println("set"+s);
+		//System.out.println("set"+s);
 
 		for(String s2: s)
 		{
@@ -142,7 +143,7 @@ public class Classesparse {
 			else
 			{
 				e=classModel.getClass_Name()+s2;
-				System.out.println("EE"+e);
+				//System.out.println("EE"+e);
 				String erev=new StringBuffer(e).reverse().toString();
 				if(varcollection.contains(erev))
 				{
@@ -159,15 +160,6 @@ public class Classesparse {
 
 		}
 	}
-
-
-
-
-
-
-
-
-
 
 	public String getClassGrammer(ClassTemplate classModel) {
 		String grammer = "";
@@ -217,13 +209,21 @@ public class Classesparse {
 				String vType;
 				String modifier ="";
 				String vName, initValue = null;
+
 				jClass.setClass_Name(n.getName().toString());
 				jClass.setInterface(n.isInterface());
 
+
+				List<ClassOrInterfaceType> extendz = n.getExtendedTypes();
+				if (extendz != null) {
+					for (int i = 0; i < extendz.size(); i++) {
+						jClass.setExtendz(extendz.get(i).getName().toString());
+						System.out.println("extends"+extendz.get(i).getName().toString());
+					}
+				}
+
 				System.out.println("----------------------------");
 				System.out.println("ClassName=>" + n.getName().toString()); 
-
-				jClass.setInterface(n.isInterface());
 
 				List<BodyDeclaration<?>> bDeclrs = n.getMembers();
 				Type l1 = null;
@@ -323,8 +323,8 @@ public class Classesparse {
 
 				jClass.refvarmap.put(n.getName().toString(), jClass.refervariable);
 				classes.put(n.getName().toString(), jClass);
-				System.out.println("mapval--->>"+Arrays.asList(jClass.refvarmap));
-				System.out.println(jClass.refvarmap.values());
+				//System.out.println("mapval--->>"+Arrays.asList(jClass.refvarmap));
+				//System.out.println(jClass.refvarmap.values());
 
 			}
 			//System.out.println(n.getName().toString());
@@ -337,4 +337,6 @@ public class Classesparse {
 	}//class visitor
 
 }//classes parse
+
+
 
