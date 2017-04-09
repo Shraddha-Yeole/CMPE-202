@@ -213,7 +213,10 @@ public class Classesparse {
 				jClass.setClass_Name(n.getName().toString());
 				jClass.setInterface(n.isInterface());
 
-
+				/*
+				Method method = new Method(constr.getName(), "", Modifier.toString(constr.getModifiers()));
+                jClass.addMethod(method.getName(), method);
+				*/
 				List<ClassOrInterfaceType> extendz = n.getExtendedTypes();
 				if (extendz != null) {
 					for (int i = 0; i < extendz.size(); i++) {
@@ -229,6 +232,8 @@ public class Classesparse {
 						System.out.println("implement"+implementz.get(i).getName().toString());
 					}
 				}
+				
+				
 
 
 
@@ -273,14 +278,7 @@ public class Classesparse {
 									jClass.varmap.put(vi.getName(), vi);
 								}
 
-								/*
-								else if(vDeclar.getType().toString().contains("Collection"))
-								{
-									String checkcollection=vDeclar.getType().toString();
-									String result=checkcollection.substring(checkcollection.indexOf("<")+1,checkcollection.indexOf(">"));
-									System.out.println("result"+result);
-									jClass.refervariable.add(result);
-								}*/
+								
 								else 
 								{
 									jClass.refervariable.add(vDeclar.getType().toString());
@@ -347,5 +345,6 @@ public class Classesparse {
 	}//class visitor
 
 }//classes parse
+
 
 
