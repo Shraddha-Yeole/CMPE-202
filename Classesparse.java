@@ -43,12 +43,9 @@ import net.sourceforge.plantuml.core.DiagramDescription;
 
 public class Classesparse {
 
-
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
-
 	Set <String> varrelation= new HashSet<String>();
 	Set <String> varcollection=new HashSet<String>();
-
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
 		try {
@@ -165,7 +162,7 @@ public class Classesparse {
 		String grammer = "";
 
 		if (classModel.isInterface()) {
-			grammer = grammer + "interface " + classModel.getClass_Name();
+			grammer = grammer + "interface " + classModel.getClass_Name()+"<<interface>>"+"{";
 		} else {
 			grammer = grammer + "class " + classModel.getClass_Name()+"{";
 
@@ -200,6 +197,8 @@ public class Classesparse {
 
 		//ClassTemplate jClass1= new ClassTemplate(null);
 
+		private static final MethodClass MethodClass = null;
+
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 			if (arg instanceof ClassTemplate) {
 
@@ -208,9 +207,9 @@ public class Classesparse {
 
 				/*if (bDeclr instanceof ConstructorDeclaration) {
                     ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
-                    */
-				
-				
+				 */
+
+
 				String vType;
 				String modifier ="";
 				String vName, initValue = null;
@@ -221,24 +220,24 @@ public class Classesparse {
 				/*
 				Method method = new Method(constr.getName(), "", Modifier.toString(constr.getModifiers()));
                 jClass.addMethod(method.getName(), method);
-				*/
-				List<ClassOrInterfaceType> extendz = n.getExtendedTypes();
+				 */
+				/*List<ClassOrInterfaceType> extendz = n.getExtendedTypes();
 				if (extendz != null) {
 					for (int i = 0; i < extendz.size(); i++) {
 						jClass.setExtendz(extendz.get(i).getName().toString());
 						System.out.println("extends"+extendz.get(i).getName().toString());
 					}
 				}
-
-				List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
+				 */
+				/*			List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
 				if (implementz != null) {
 					for (int i = 0; i < implementz.size(); i++) {
 						jClass.addInterface(implementz.get(i).getName().toString());
 						System.out.println("implement"+implementz.get(i).getName().toString());
 					}
 				}
-				
-				
+
+				 */		
 
 
 
@@ -283,7 +282,7 @@ public class Classesparse {
 									jClass.varmap.put(vi.getName(), vi);
 								}
 
-								
+
 								else 
 								{
 									jClass.refervariable.add(vDeclar.getType().toString());
@@ -319,14 +318,23 @@ public class Classesparse {
 							MethodClass method = new MethodClass(jmethod.getName().toString(),
 									jmethod.getType().toString(), Modifier.getAccessSpecifier(methmod).toString());
 							System.out.println("method_Class_Details=>" + method);
+							jClass.addMethod(jmethod.getName().toString(), method);
+							//System.out.println("meth+"+jmethod.getName().toString());
 
-						}
 
-						jmethod.getModifiers();
 
-						List<Parameter> param = ((MethodDeclaration) bDeclr).getParameters();
-						for (Parameter pm : param) {
-							System.out.println("Method_parameter=>:" + pm.getName());
+							jmethod.getModifiers();
+							//jClass.addMethod(MethodClass.getName(), MethodClass);
+							//System.out.println("method class"+MethodClass.getName());
+							List<Parameter> param = ((MethodDeclaration) bDeclr).getParameters();
+							for (Parameter pm : param) {
+								System.out.println("Method_parameter=>:" + pm.getName());
+								System.out.println("Method_parameter_Return"+pm.getType());
+								method.add_Parameter(new VariableInfo(pm.getName().toString(), pm.getType().toString(),null));
+
+
+							}
+
 
 						}
 
