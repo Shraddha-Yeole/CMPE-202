@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 //import java.util.ArrayList;
 //import java.util.Arrays;
@@ -46,6 +47,7 @@ public class Classesparse {
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
 	Set <String> varrelation= new HashSet<String>();
 	Set <String> varcollection=new HashSet<String>();
+	
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
 		try {
@@ -87,6 +89,7 @@ public class Classesparse {
 
 
 			grammer = grammer + "\n" + getClassGrammer(classModel)+"\n";
+			
 			checkRelationship(classModel);
 
 		}
@@ -96,11 +99,15 @@ public class Classesparse {
 
 		for(String s3:varrelation)
 		{
-			System.out.println(s3);
+			System.out.println("s3 "+s3);
 			grammer = grammer + s3+"\n";
 		}
-
-
+		
+		
+		
+		
+		
+		//for ()
 
 		grammer = grammer+ "\n@enduml";
 		return grammer;
@@ -160,27 +167,84 @@ public class Classesparse {
 
 	public String getClassGrammer(ClassTemplate classModel) {
 		String grammer = "";
-
+		String modifier = "", mGrammer = "";
 		if (classModel.isInterface()) {
 			grammer = grammer + "interface " + classModel.getClass_Name()+"<<interface>>"+"{";
 		} else {
 			grammer = grammer + "class " + classModel.getClass_Name()+"{";
-
-			for(VariableInfo vn :classModel.varmap.values())
+	
+			
+			for(ClassOrInterfaceType ci: classModel.extendsList)
+			{
+				grammer=grammer+"extends"+ci.getName().toString();
+			
+			}
+			
+			grammer=grammer+"\n";
+			/*
+			//List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
+			for (int i = 0; i < implementz.size(); i++) {
+				classModel.addInterface(implementz.get(i).getName().toString());
+				grammer=grammer+"implement"+implementz.get(i).getName().toString();
+				//classModel.getInterfaces();
+				
+			}
+			*/
+		for(VariableInfo vn :classModel.varmap.values())
 			{
 
 				grammer = grammer +"\n"+vn.getAccess_modifier()+vn.getName()+":"+vn.getData_type();
 			}
 
+			for (MethodClass method : classModel.getMethods()) {
+					
+						if (method.getAccess_modifier().toString().contains("PUBLIC"))
+							modifier = "+";
+						else if (method.getAccess_modifier().toString().contains("PRIVATE"))
+							modifier = "-";
+						else
+							modifier = "#";
+						
+						 
+		                
+		                grammer= grammer+"\n"+modifier+method.getName()+"(";
+		                   
+		                for (VariableInfo pVar : method.getParameters().values()) {
+	                        String pVariable = pVar.getName() + ":" + pVar.getData_type();
+	                        int i=0;
+							i++;
+	                        if (method.getParameters().values().size() != i) {
+	                            pVariable = pVariable + ",";
+	                        }
+	                        grammer = grammer + pVariable+")";
 
+		                           }
+		                
+			}
+			
+			
+			grammer=grammer+ "\n";
+			
+		
 
 		}
-
 		grammer = grammer+"\n"+"}";
-
 		return grammer;
-	}
+	}	
+		
+	
+	
 
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public void viewClassDiagram(String grammer) throws IOException {
 		ByteArrayOutputStream boutStram = new ByteArrayOutputStream();
 		SourceStringReader reader = new SourceStringReader(grammer);
@@ -191,6 +255,7 @@ public class Classesparse {
 		ImageIO.write(img, "png", new File("/Users/shraddhayeole/Desktop/testoutput" + ".png"));
 		System.out.println(gdesc);
 	}
+
 
 	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
@@ -209,40 +274,39 @@ public class Classesparse {
                     ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
 				 */
 
+				
+				List<ClassOrInterfaceType> extendsList= n.getExtendedTypes();
+		
+				for(ClassOrInterfaceType ci: extendsList)
+				{
+					System.out.println("extendslist--"+ci.getName().toString());
+				}
 
 				String vType;
 				String modifier ="";
 				String vName, initValue = null;
-
+				//String grammer="";
 				jClass.setClass_Name(n.getName().toString());
 				jClass.setInterface(n.isInterface());
-
+				//System.out.println("interface"+jClass.getInterfaces());
 				/*
 				Method method = new Method(constr.getName(), "", Modifier.toString(constr.getModifiers()));
                 jClass.addMethod(method.getName(), method);
 				 */
-				/*List<ClassOrInterfaceType> extendz = n.getExtendedTypes();
-				if (extendz != null) {
-					for (int i = 0; i < extendz.size(); i++) {
-						jClass.setExtendz(extendz.get(i).getName().toString());
-						System.out.println("extends"+extendz.get(i).getName().toString());
-					}
-				}
-				 */
-				/*			List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
-				if (implementz != null) {
-					for (int i = 0; i < implementz.size(); i++) {
-						jClass.addInterface(implementz.get(i).getName().toString());
-						System.out.println("implement"+implementz.get(i).getName().toString());
-					}
+						List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
+						for (int i = 0; i < implementz.size(); i++) {
+							jClass.addInterface(implementz.get(i).getName().toString());
+							System.out.println("implement--"+implementz.get(i).getName().toString());
+					
 				}
 
-				 */		
+				
+				 		
 
 
 
-				System.out.println("----------------------------");
-				System.out.println("ClassName=>" + n.getName().toString()); 
+				//System.out.println("----------------------------");
+				System.out.println("ClassName=>" + n.getName().toString()+"\n"); 
 
 				List<BodyDeclaration<?>> bDeclrs = n.getMembers();
 				Type l1 = null;
@@ -250,29 +314,33 @@ public class Classesparse {
 				for (BodyDeclaration bDeclr : bDeclrs)
 				{
 					if (bDeclr instanceof FieldDeclaration) {
+						//System.out.println("nnn");
 						FieldDeclaration var = (FieldDeclaration) bDeclr;
 						VariableInfo vi= new VariableInfo("", "", "");
 						List<VariableDeclarator> vDeclars = var.getVariables();
 						vType = var.getModifiers().toString();
 
-						if (var.getModifiers().toString().compareToIgnoreCase("public")==0)
+						if (var.getModifiers().toString().contains("PUBLIC"))
 							modifier = "+";
-						else if (var.getModifiers().toString().compareToIgnoreCase("[private]")==0)
+						
+						else if (var.getModifiers().toString().contains("PRIVATE"))
 							modifier = "-";
 						else
 							modifier = "#";
 
-
+						//System.out.println("hello");
 
 						for (VariableDeclarator vDeclar : vDeclars) {
 							l1 = vDeclar.getType();
+							
 							v4 = vDeclar.getName().toString();
 
-
+							System.out.println(v4);
+							System.out.println(l1);
 							if (vDeclar.getType() instanceof ReferenceType)
 							{
-
-								if (vDeclar.getType().toString().contains("[]"))
+								//System.out.println("wrong");
+								if (vDeclar.getType().toString().contains("[]") || vDeclar.getType().toString().contains("String") && (modifier.equals("-") || modifier.equals("+")))
 								{
 									System.out.println("Variable Name=>" + v4);
 									vi.setName(v4);
@@ -287,8 +355,9 @@ public class Classesparse {
 								{
 									jClass.refervariable.add(vDeclar.getType().toString());
 								}	
+								//System.out.println("in if");
 							}else{
-
+								
 								System.out.println("Variable Name=>" + v4);
 								vi.setName(v4);
 								System.out.println("Variable data_Type=>" + l1);
@@ -296,7 +365,7 @@ public class Classesparse {
 								vi.setAccess_modifier(modifier);
 
 								jClass.varmap.put(vi.getName(), vi);
-
+								System.out.println("check variable name "+vi.getName());
 							}
 
 						}
@@ -307,16 +376,26 @@ public class Classesparse {
 
 					if (bDeclr instanceof MethodDeclaration) {
 						MethodDeclaration jmethod = (MethodDeclaration) bDeclr;
-
+						MethodClass mi= new MethodClass("", "", "");
 						System.out.println("MethodName=>" + jmethod.getName());
 						System.out.println("MethodReturn_Type=>"+jmethod.getType());
 						EnumSet<Modifier> methmod = jmethod.getModifiers();
 						for (Modifier mod1 : methmod) {
 							AccessSpecifier m5 = Modifier.getAccessSpecifier(methmod);
 							System.out.println("Method_modifier=>" + m5);
+							
+							if (m5.toString().compareToIgnoreCase("public")==0)
+								modifier = "+";
+							else if (m5.toString().compareToIgnoreCase("[private]")==0)
+								modifier = "-";
+							else
+								modifier = "#";
 
-							MethodClass method = new MethodClass(jmethod.getName().toString(),
-									jmethod.getType().toString(), Modifier.getAccessSpecifier(methmod).toString());
+							mi.setAccess_modifier(modifier);
+							System.out.println("modifiers "+mi.getAccess_modifier());
+							
+							MethodClass method = new MethodClass(Modifier.getAccessSpecifier(methmod).toString(),Modifier.getAccessSpecifier(methmod).toString(),
+									jmethod.getName().toString());
 							System.out.println("method_Class_Details=>" + method);
 							jClass.addMethod(jmethod.getName().toString(), method);
 							//System.out.println("meth+"+jmethod.getName().toString());
