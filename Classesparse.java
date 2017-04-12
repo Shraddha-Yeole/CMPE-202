@@ -27,11 +27,13 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 //import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
@@ -62,7 +64,7 @@ public class Classesparse {
 
 
 	public void parseClasses() throws Exception {
-		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/testcase3");
+		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-4");
 		File[] fileset = config.listFiles();
 		if (fileset != null) {
 			for (File javaFile : fileset) {
@@ -159,6 +161,21 @@ public class Classesparse {
 		}
 	}
 
+	
+	
+	
+	public static boolean isGetSetter(ClassTemplate classModel, MethodClass method) {
+		for (VariableInfo cVar: classModel.varmap.values()) {
+			if(method.getName().equalsIgnoreCase("get" + cVar.getName()) || method.getName().equalsIgnoreCase("set" + cVar.getName())) {
+				cVar.setAccess_modifier("+");
+				return true;
+			}
+		}
+		return false;
+
+	}
+	
+	
 	public String getClassGrammer(ClassTemplate classModel) {
 		String grammer = "";
 		String modifier = "", mGrammer = "";
@@ -403,14 +420,14 @@ public class Classesparse {
 							mi.setAccess_modifier(modifier);
 							System.out.println("modifiers "+mi.getAccess_modifier());
 
-							MethodClass method = new MethodClass(Modifier.getAccessSpecifier(methmod).toString(),Modifier.getAccessSpecifier(methmod).toString(),
+							MethodClass method = new MethodClass(Modifier.getAccessSpecifier(methmod).toString(),jmethod.getType().toString(),
 									jmethod.getName().toString());
-							System.out.println("method_Class_Details=>" + method);
+							
+							if (!isGetSetter(jClass, method)) {
+							//System.out.println("method_Class_Details=>" + method);
 							jClass.addMethod(jmethod.getName().toString(), method);
 							//System.out.println("meth+"+jmethod.getName().toString());
-
-
-
+							}
 							jmethod.getModifiers();
 							//jClass.addMethod(MethodClass.getName(), MethodClass);
 							//System.out.println("method class"+MethodClass.getName());
@@ -426,8 +443,9 @@ public class Classesparse {
 
 						}
 
-					} //end of method declaration
-
+					} //end of method declaration		
+					
+					
 				} //end of body declaration for loop
 
 				jClass.refvarmap.put(n.getName().toString(), jClass.refervariable);
