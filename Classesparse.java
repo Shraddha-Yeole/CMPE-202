@@ -1,3 +1,4 @@
+
 package javatouml.parsejava;
 
 import java.awt.image.BufferedImage;
@@ -443,7 +444,29 @@ public class Classesparse {
 
 						}
 
-					} //end of method declaration		
+					} //end of method declaration
+
+					
+					
+				if (bDeclr instanceof ConstructorDeclaration) {
+                        ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
+                        
+                        EnumSet<Modifier> m5 = constr.getModifiers();
+                        
+                        
+
+                        MethodClass method = new MethodClass(m5.toString(),"",constr.getName().toString());
+                        jClass.addMethod(method.getName(), method);
+
+                        if (constr.getParameters() != null) {
+                            for (Parameter param : constr.getParameters()) {
+                                method.add_Parameter(new VariableInfo(param.getName().toString(), param.getType().toString(), null));
+                            }
+                        }
+
+                      
+                    }
+					
 					
 					
 				} //end of body declaration for loop
@@ -464,6 +487,5 @@ public class Classesparse {
 	}//class visitor
 
 }//classes parse
-
 
 
