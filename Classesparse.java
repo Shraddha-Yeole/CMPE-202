@@ -1,4 +1,3 @@
-
 package javatouml.parsejava;
 
 import java.awt.image.BufferedImage;
@@ -65,7 +64,7 @@ public class Classesparse {
 
 
 	public void parseClasses() throws Exception {
-		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-4");
+		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/testcase3");
 		File[] fileset = config.listFiles();
 		if (fileset != null) {
 			for (File javaFile : fileset) {
@@ -117,7 +116,7 @@ public class Classesparse {
 		String g="";
 
 		Set<String> s= classModel.refvarmap.get(classModel.getClass_Name());
-		//System.out.println("set"+s);
+		System.out.println("set"+s);
 
 		for(String s2: s)
 		{
@@ -140,6 +139,10 @@ public class Classesparse {
 					varrelation.add(f);
 					varcollection.add(e);
 				}
+			}
+			else if(s2.contains("String"))
+			{
+				
 			}
 			else
 			{
@@ -333,7 +336,7 @@ public class Classesparse {
 
 
 				//System.out.println("----------------------------");
-				System.out.println("ClassName=>" + n.getName().toString()+"\n"); 
+				System.out.println("\n"+"ClassName=>" + n.getName().toString()); 
 
 				List<BodyDeclaration<?>> bDeclrs = n.getMembers();
 				Type l1 = null;
@@ -341,7 +344,7 @@ public class Classesparse {
 				for (BodyDeclaration bDeclr : bDeclrs)
 				{
 					if (bDeclr instanceof FieldDeclaration) {
-						//System.out.println("nnn");
+			
 						FieldDeclaration var = (FieldDeclaration) bDeclr;
 						VariableInfo vi= new VariableInfo("", "", "");
 						List<VariableDeclarator> vDeclars = var.getVariables();
@@ -355,18 +358,17 @@ public class Classesparse {
 						else
 							modifier = "#";
 
-						//System.out.println("hello");
 
 						for (VariableDeclarator vDeclar : vDeclars) {
 							l1 = vDeclar.getType();
 
 							v4 = vDeclar.getName().toString();
 
-							System.out.println(v4);
-							System.out.println(l1);
+							//System.out.println(v4);
+							//System.out.println(l1);
 							if (vDeclar.getType() instanceof ReferenceType)
 							{
-								//System.out.println("wrong");
+								
 								if (vDeclar.getType().toString().contains("[]") || vDeclar.getType().toString().contains("String") && (modifier.equals("-") || modifier.equals("+")))
 								{
 									System.out.println("Variable Name=>" + v4);
@@ -376,23 +378,21 @@ public class Classesparse {
 									vi.setAccess_modifier(modifier);
 									jClass.varmap.put(vi.getName(), vi);
 								}
-
-
 								else 
 								{
 									jClass.refervariable.add(vDeclar.getType().toString());
 								}	
-								//System.out.println("in if");
+								
 							}else{
 
-								System.out.println("Variable Name=>" + v4);
+								System.out.println("Variable Name--" + v4);
 								vi.setName(v4);
-								System.out.println("Variable data_Type=>" + l1);
+								System.out.println("Variable data_Type--" + l1);
 								vi.setData_type(l1.toString());
 								vi.setAccess_modifier(modifier);
 
 								jClass.varmap.put(vi.getName(), vi);
-								System.out.println("check variable name "+vi.getName());
+								//System.out.println("check variable name=>"+vi.getName()); //x y integers
 							}
 
 						}
@@ -404,7 +404,7 @@ public class Classesparse {
 					if (bDeclr instanceof MethodDeclaration) {
 						MethodDeclaration jmethod = (MethodDeclaration) bDeclr;
 						MethodClass mi= new MethodClass("", "", "");
-						System.out.println("MethodName=>" + jmethod.getName());
+						System.out.println("\n"+"MethodName=>" + jmethod.getName());
 						System.out.println("MethodReturn_Type=>"+jmethod.getType());
 						EnumSet<Modifier> methmod = jmethod.getModifiers();
 						for (Modifier mod1 : methmod) {
@@ -419,7 +419,7 @@ public class Classesparse {
 								modifier = "#";
 
 							mi.setAccess_modifier(modifier);
-							System.out.println("modifiers "+mi.getAccess_modifier());
+							System.out.println("modifiers=>"+mi.getAccess_modifier());
 
 							MethodClass method = new MethodClass(Modifier.getAccessSpecifier(methmod).toString(),jmethod.getType().toString(),
 									jmethod.getName().toString());
@@ -435,7 +435,7 @@ public class Classesparse {
 							List<Parameter> param = ((MethodDeclaration) bDeclr).getParameters();
 							for (Parameter pm : param) {
 								System.out.println("Method_parameter=>:" + pm.getName());
-								System.out.println("Method_parameter_Return"+pm.getType());
+								System.out.println("Method_parameter_Return=>"+pm.getType());
 								method.add_Parameter(new VariableInfo(pm.getName().toString(), pm.getType().toString(),null));
 
 
@@ -485,7 +485,9 @@ public class Classesparse {
 
 		}//void visit
 	}//class visitor
+	
 
 }//classes parse
+
 
 
