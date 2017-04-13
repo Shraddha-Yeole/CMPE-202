@@ -49,7 +49,7 @@ public class Classesparse {
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
 	Set <String> varrelation= new HashSet<String>();
 	Set <String> varcollection=new HashSet<String>();
-
+	//static List<String> interfaceList=new ArrayList<String>();
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
 		try {
@@ -64,7 +64,7 @@ public class Classesparse {
 
 
 	public void parseClasses() throws Exception {
-		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/testcase3");
+		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/testcase2");
 		File[] fileset = config.listFiles();
 		if (fileset != null) {
 			for (File javaFile : fileset) {
@@ -88,17 +88,12 @@ public class Classesparse {
 
 		String grammer = "@startuml"+"\n" + "skinparam classAttributeIconSize 0" + "\n" ;
 		for (ClassTemplate classModel : classes.values()) {
-
-
 			grammer = grammer + "\n" + getClassGrammer(classModel)+"\n";
 
 			checkRelationship(classModel);
-
+			checkDependency(classModel);
 		}
-
-		//System.out.println("varrelation"+varrelation);
-
-
+		
 		for(String s3:varrelation)
 		{
 			System.out.println("s3 "+s3);
@@ -109,6 +104,20 @@ public class Classesparse {
 		return grammer;
 	}
 
+	
+	public void checkDependency(ClassTemplate classModel){
+		
+		for(MethodClass m: classModel.getMethods())
+		{
+			for (VariableInfo pVar : m.getParameters().values()) {
+				if(pVar.getData_type() instanceof ReferenceType)
+			System.out.println("data_type"+pVar.getData_type());
+			}
+		}
+		
+	}
+	
+	
 	public void checkRelationship(ClassTemplate classModel){
 
 		String e="";
@@ -184,6 +193,7 @@ public class Classesparse {
 		String grammer = "";
 		String modifier = "", mGrammer = "";
 		if (classModel.isInterface()) {
+			//interfaceList.add(classModel.getClass_Name());
 			grammer = grammer + "interface " + classModel.getClass_Name()+"<<interface>>"+"{";
 		} else {
 			grammer = grammer + "class " + classModel.getClass_Name();
@@ -208,24 +218,7 @@ public class Classesparse {
 					
 					grammer=grammer+"{";
 					
-					
-
-
-
-			//grammer=grammer
-
-
-
-			//grammer=grammer+"\n";
-			/*
-			//List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
-			for (int i = 0; i < implementz.size(); i++) {
-				classModel.addInterface(implementz.get(i).getName().toString());
-				grammer=grammer+"implement"+implementz.get(i).getName().toString();
-				//classModel.getInterfaces();
-
-			}
-			 */
+		
 			for(VariableInfo vn :classModel.varmap.values())
 			{
 
@@ -282,9 +275,7 @@ public class Classesparse {
 
 	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
-
-		//ClassTemplate jClass1= new ClassTemplate(null);
-
+		
 		private static final MethodClass MethodClass = null;
 
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
@@ -292,10 +283,6 @@ public class Classesparse {
 
 				ClassTemplate jClass = (ClassTemplate) arg;
 				ClassTemplate.refervariable =  new HashSet();
-
-				/*if (bDeclr instanceof ConstructorDeclaration) {
-                    ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
-				 */
 
 
 				List<ClassOrInterfaceType> extendsList= n.getExtendedTypes();
@@ -314,30 +301,19 @@ public class Classesparse {
 				String vType;
 				String modifier ="";
 				String vName, initValue = null;
-				//String grammer="";
 				jClass.setClass_Name(n.getName().toString());
 				jClass.setInterface(n.isInterface());
 
-				//System.out.println("interface"+jClass.getInterfaces());
-				/*
-				Method method = new Method(constr.getName(), "", Modifier.toString(constr.getModifiers()));
-                jClass.addMethod(method.getName(), method);
-				 */
+				
 				List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
 				for (int i = 0; i < implementz.size(); i++) {
 					jClass.addInterface(implementz.get(i).getName().toString());
 					//System.out.println("implement--"+implementz.get(i).getName().toString());
-
+					//System.out.println(implement);
 				}
-
-
-
-
-
-
 				//System.out.println("----------------------------");
 				System.out.println("\n"+"ClassName=>" + n.getName().toString()); 
-
+				//System.out.println("interfacelist"+interfaceList);
 				List<BodyDeclaration<?>> bDeclrs = n.getMembers();
 				Type l1 = null;
 				String v4 = null;
@@ -346,7 +322,7 @@ public class Classesparse {
 					if (bDeclr instanceof FieldDeclaration) {
 			
 						FieldDeclaration var = (FieldDeclaration) bDeclr;
-						VariableInfo vi= new VariableInfo("", "", "");
+						VariableInfo vi= new VariableInfo("", null, "");
 						List<VariableDeclarator> vDeclars = var.getVariables();
 						vType = var.getModifiers().toString();
 
@@ -363,9 +339,6 @@ public class Classesparse {
 							l1 = vDeclar.getType();
 
 							v4 = vDeclar.getName().toString();
-
-							//System.out.println(v4);
-							//System.out.println(l1);
 							if (vDeclar.getType() instanceof ReferenceType)
 							{
 								
@@ -374,7 +347,7 @@ public class Classesparse {
 									System.out.println("Variable Name=>" + v4);
 									vi.setName(v4);
 									System.out.println("Variable data_Type=>" + l1);
-									vi.setData_type(l1.toString());
+									vi.setData_type(l1);
 									vi.setAccess_modifier(modifier);
 									jClass.varmap.put(vi.getName(), vi);
 								}
@@ -388,7 +361,7 @@ public class Classesparse {
 								System.out.println("Variable Name--" + v4);
 								vi.setName(v4);
 								System.out.println("Variable data_Type--" + l1);
-								vi.setData_type(l1.toString());
+								vi.setData_type(l1);
 								vi.setAccess_modifier(modifier);
 
 								jClass.varmap.put(vi.getName(), vi);
@@ -436,7 +409,7 @@ public class Classesparse {
 							for (Parameter pm : param) {
 								System.out.println("Method_parameter=>:" + pm.getName());
 								System.out.println("Method_parameter_Return=>"+pm.getType());
-								method.add_Parameter(new VariableInfo(pm.getName().toString(), pm.getType().toString(),null));
+								method.add_Parameter(new VariableInfo(pm.getName().toString(), pm.getType(),null));
 
 
 							}
@@ -460,7 +433,7 @@ public class Classesparse {
 
                         if (constr.getParameters() != null) {
                             for (Parameter param : constr.getParameters()) {
-                                method.add_Parameter(new VariableInfo(param.getName().toString(), param.getType().toString(), null));
+                                method.add_Parameter(new VariableInfo(param.getName().toString(), param.getType(), null));
                             }
                         }
 
