@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -25,6 +26,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
@@ -34,6 +36,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
@@ -49,7 +52,7 @@ public class Classesparse {
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
 	Set <String> varrelation= new HashSet<String>();
 	Set <String> varcollection=new HashSet<String>();
-	//static List<String> interfaceList=new ArrayList<String>();
+    List<String> DependencyList=new ArrayList<String>();
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
 		try {
@@ -64,7 +67,7 @@ public class Classesparse {
 
 
 	public void parseClasses() throws Exception {
-		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/testcase2");
+		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-4");
 		File[] fileset = config.listFiles();
 		if (fileset != null) {
 			for (File javaFile : fileset) {
@@ -93,31 +96,57 @@ public class Classesparse {
 			checkRelationship(classModel);
 			checkDependency(classModel);
 		}
-		
+
 		for(String s3:varrelation)
 		{
-			System.out.println("s3 "+s3);
+			//System.out.println("s3 "+s3);
 			grammer = grammer + s3+"\n";
 		}
 
+		for(String s4:DependencyList)
+		{
+			//System.out.println("s4"+s4);
+			grammer=grammer+ s4+"\n";
+		}
+		
 		grammer = grammer+ "\n@enduml";
 		return grammer;
 	}
 
-	
+
 	public void checkDependency(ClassTemplate classModel){
-		
+
+		String a="";
 		for(MethodClass m: classModel.getMethods())
 		{
 			for (VariableInfo pVar : m.getParameters().values()) {
-				if(pVar.getData_type() instanceof ReferenceType)
-			System.out.println("data_type"+pVar.getData_type());
+				
+				if((pVar.getData_type() instanceof ReferenceType))
+				{
+					if(classes.containsKey(pVar.getData_type().toString()) && classes.get(pVar.getData_type().toString()).isInterface())
+					{	
+						if (classModel.isInterface())
+						{
+							
+						}
+						else
+							{
+							a=classModel.getClass_Name()+"..>"+pVar.getData_type()+":uses";
+							}
+						if(!DependencyList.contains(a))
+							
+						    DependencyList.add(a);
+					}
+						  
+					}
+					}
+				}
 			}
-		}
 		
-	}
+
 	
-	
+
+
 	public void checkRelationship(ClassTemplate classModel){
 
 		String e="";
@@ -151,7 +180,7 @@ public class Classesparse {
 			}
 			else if(s2.contains("String"))
 			{
-				
+
 			}
 			else
 			{
@@ -174,51 +203,89 @@ public class Classesparse {
 		}
 	}
 
-	
-	
-	
+
+
+
 	public static boolean isGetSetter(ClassTemplate classModel, MethodClass method) {
 		for (VariableInfo cVar: classModel.varmap.values()) {
 			if(method.getName().equalsIgnoreCase("get" + cVar.getName()) || method.getName().equalsIgnoreCase("set" + cVar.getName())) {
 				cVar.setAccess_modifier("+");
 				return true;
 			}
+			//else if(method.getName().contains("set")  || method.getName().contains("get"))
+			//{
+				//return true;
+			//}
 		}
 		return false;
 
 	}
-	
-	
+
+
 	public String getClassGrammer(ClassTemplate classModel) {
 		String grammer = "";
 		String modifier = "", mGrammer = "";
 		if (classModel.isInterface()) {
 			//interfaceList.add(classModel.getClass_Name());
 			grammer = grammer + "interface " + classModel.getClass_Name()+"<<interface>>"+"{";
+			
+			
+			for (MethodClass method : classModel.getMethods()) {
+
+				if (method.getAccess_modifier().toString().contains("PUBLIC"))
+					modifier = "+";
+				else if (method.getAccess_modifier().toString().contains("PRIVATE"))
+					modifier = "-";
+				else
+					modifier = "#";
+
+
+
+				grammer= grammer+"\n"+modifier+method.getName()+"(";
+
+				for (VariableInfo pVar : method.getParameters().values()) {
+					String pVariable = pVar.getName() + ":" + pVar.getData_type();
+					int i=0;
+					i++;
+					if (method.getParameters().values().size() != i) {
+						pVariable = pVariable + ",";
+					}
+					grammer = grammer + pVariable;
+
+				}
+
+			
+					grammer = grammer +")"+":"+method.getReturn_type();
+				
+
+
+			
+
+			}
 		} else {
 			grammer = grammer + "class " + classModel.getClass_Name();
-			
+
 			if (classModel.getExtendz() != null)
-				{
+			{
 				grammer=grammer+" extends "+ classModel.getExtendz();
-				}
-			
+			}
+
 			if (classModel.getInterfaces() != null && classModel.getInterfaces().size() > 0) {
-	            int i = 0;
-	            grammer = grammer + " implements ";
-	            for (String interf : classModel.getInterfaces()) {
-	                grammer = grammer + interf;
-	                i++;
-	                if (i != classModel.getInterfaces().size()) {
-	                    grammer = grammer + ", ";
-	                }
-	            }
-	        }
-			
-					
-					grammer=grammer+"{";
-					
-		
+				int i = 0;
+				grammer = grammer + " implements ";
+				for (String interf : classModel.getInterfaces()) {
+					grammer = grammer + interf;
+					i++;
+					if (i != classModel.getInterfaces().size()) {
+						grammer = grammer + ", ";
+					}
+				}
+			}
+
+
+			grammer=grammer+"{";
+
+
 			for(VariableInfo vn :classModel.varmap.values())
 			{
 
@@ -245,16 +312,17 @@ public class Classesparse {
 					if (method.getParameters().values().size() != i) {
 						pVariable = pVariable + ",";
 					}
-					grammer = grammer + pVariable+")";
+					grammer = grammer + pVariable;
 
 				}
 
+			
+				if(method.getReturn_type() != null)
+				{
+					grammer = grammer +")"+":"+method.getReturn_type();
+				}
+				
 			}
-
-
-			grammer=grammer+ "\n";
-
-
 
 		}
 		grammer = grammer+"\n"+"}";
@@ -275,7 +343,7 @@ public class Classesparse {
 
 	/*Method  for parsing class type*/
 	public static class ClassVisitor extends VoidVisitorAdapter {
-		
+
 		private static final MethodClass MethodClass = null;
 
 		public void visit(ClassOrInterfaceDeclaration n, Object arg) {
@@ -286,17 +354,17 @@ public class Classesparse {
 
 
 				List<ClassOrInterfaceType> extendsList= n.getExtendedTypes();
-				
+
 				if(extendsList != null){
-					
+
 					for (int i = 0; i < extendsList.size(); i++) {
 
-							jClass.setExtendz(extendsList.get(i).getName().toString());
-						
+						jClass.setExtendz(extendsList.get(i).getName().toString());
+
 					}
 				}
 
-				
+
 
 				String vType;
 				String modifier ="";
@@ -304,7 +372,7 @@ public class Classesparse {
 				jClass.setClass_Name(n.getName().toString());
 				jClass.setInterface(n.isInterface());
 
-				
+
 				List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
 				for (int i = 0; i < implementz.size(); i++) {
 					jClass.addInterface(implementz.get(i).getName().toString());
@@ -320,7 +388,7 @@ public class Classesparse {
 				for (BodyDeclaration bDeclr : bDeclrs)
 				{
 					if (bDeclr instanceof FieldDeclaration) {
-			
+
 						FieldDeclaration var = (FieldDeclaration) bDeclr;
 						VariableInfo vi= new VariableInfo("", null, "");
 						List<VariableDeclarator> vDeclars = var.getVariables();
@@ -341,7 +409,7 @@ public class Classesparse {
 							v4 = vDeclar.getName().toString();
 							if (vDeclar.getType() instanceof ReferenceType)
 							{
-								
+
 								if (vDeclar.getType().toString().contains("[]") || vDeclar.getType().toString().contains("String") && (modifier.equals("-") || modifier.equals("+")))
 								{
 									System.out.println("Variable Name=>" + v4);
@@ -355,7 +423,7 @@ public class Classesparse {
 								{
 									jClass.refervariable.add(vDeclar.getType().toString());
 								}	
-								
+
 							}else{
 
 								System.out.println("Variable Name--" + v4);
@@ -394,14 +462,35 @@ public class Classesparse {
 							mi.setAccess_modifier(modifier);
 							System.out.println("modifiers=>"+mi.getAccess_modifier());
 
+							
+							
 							MethodClass method = new MethodClass(Modifier.getAccessSpecifier(methmod).toString(),jmethod.getType().toString(),
 									jmethod.getName().toString());
-							
-							if (!isGetSetter(jClass, method)) {
-							//System.out.println("method_Class_Details=>" + method);
-							jClass.addMethod(jmethod.getName().toString(), method);
-							//System.out.println("meth+"+jmethod.getName().toString());
+							 
+
+							if (!isGetSetter(jClass, method) && modifier == "+") {
+								//System.out.println("method_Class_Details=>" + method);
+								jClass.addMethod(jmethod.getName().toString(), method);
+								//System.out.println("meth+"+jmethod.getName().toString());
 							}
+							
+							List<Node> methodbody = jmethod.getChildNodes();
+							for (Node node: methodbody)
+							{
+								System.out.println(node.toString());
+								//Statement stm;
+								for(VariableInfo s: jClass.varmap.values())
+								{
+									if(node.toString().contains(s.getName()))
+									{
+										//if()
+										System.out.println("hello"+s.getName());
+									}
+								}
+							
+							}
+							
+							
 							jmethod.getModifiers();
 							//jClass.addMethod(MethodClass.getName(), MethodClass);
 							//System.out.println("method class"+MethodClass.getName());
@@ -413,35 +502,41 @@ public class Classesparse {
 
 
 							}
-
+							
+						
+							
+							Optional<BlockStmt> blockStmnt = jmethod.getBody();
+							if (blockStmnt != null) {
+	                           
+	                        }
 
 						}
 
 					} //end of method declaration
 
-					
-					
-				if (bDeclr instanceof ConstructorDeclaration) {
-                        ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
-                        
-                        EnumSet<Modifier> m5 = constr.getModifiers();
-                        
-                        
 
-                        MethodClass method = new MethodClass(m5.toString(),"",constr.getName().toString());
-                        jClass.addMethod(method.getName(), method);
 
-                        if (constr.getParameters() != null) {
-                            for (Parameter param : constr.getParameters()) {
-                                method.add_Parameter(new VariableInfo(param.getName().toString(), param.getType(), null));
-                            }
-                        }
+					if (bDeclr instanceof ConstructorDeclaration) {
+						ConstructorDeclaration constr = (ConstructorDeclaration) bDeclr;
 
-                      
-                    }
-					
-					
-					
+						EnumSet<Modifier> m5 = constr.getModifiers();
+
+
+
+						MethodClass method = new MethodClass(m5.toString(),"",constr.getName().toString());
+						jClass.addMethod(method.getName(), method);
+
+						if (constr.getParameters() != null) {
+							for (Parameter param : constr.getParameters()) {
+								method.add_Parameter(new VariableInfo(param.getName().toString(), param.getType(), null));
+							}
+						}
+
+
+					}
+
+
+
 				} //end of body declaration for loop
 
 				jClass.refvarmap.put(n.getName().toString(), jClass.refervariable);
@@ -458,9 +553,10 @@ public class Classesparse {
 
 		}//void visit
 	}//class visitor
-	
+
 
 }//classes parse
+
 
 
 
