@@ -1,4 +1,4 @@
-package javatouml.parsejava;
+
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -53,6 +53,25 @@ public class Classesparse {
 	Set <String> varrelation= new HashSet<String>();
 	Set <String> varcollection=new HashSet<String>();
     List<String> DependencyList=new ArrayList<String>();
+    
+   // String outputDir="/Users/shraddhayeole/Desktop/testoutput" + ".png";
+	//String classpath="/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-5";
+	String classpath;
+	String outputDir;
+	
+
+	public Classesparse(String classpath,String outputDir) {
+		if (classpath == null || outputDir == null || classpath.equals("") || outputDir.equals("")) {
+			usage();
+		}
+		this.classpath = classpath;
+		this.outputDir = outputDir;
+	
+	}
+    
+	public void usage() {
+		System.out.println("Usage:\njava -jar <classpath> <outputfilename>");
+	}
 
 	public static ClassTemplate getCUnit(FileInputStream input) throws Exception {
 		try {
@@ -67,7 +86,7 @@ public class Classesparse {
 
 
 	public void parseClasses() throws Exception {
-		File config = new File("/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-4");
+		File config = new File(classpath);
 		File[] fileset = config.listFiles();
 		if (fileset != null) {
 			for (File javaFile : fileset) {
@@ -140,6 +159,9 @@ public class Classesparse {
 						  
 					}
 					}
+			
+			
+			
 				}
 			}
 		
@@ -336,7 +358,7 @@ public class Classesparse {
 		byte[] byteArray = boutStram.toByteArray();
 		InputStream input = new ByteArrayInputStream(byteArray);
 		BufferedImage img = ImageIO.read(input);
-		ImageIO.write(img, "png", new File("/Users/shraddhayeole/Desktop/testoutput" + ".png"));
+		ImageIO.write(img, "png", new File(outputDir));
 		System.out.println(gdesc);
 	}
 
@@ -433,7 +455,7 @@ public class Classesparse {
 								vi.setAccess_modifier(modifier);
 
 								jClass.varmap.put(vi.getName(), vi);
-								//System.out.println("check variable name=>"+vi.getName()); //x y integers
+								
 							}
 
 						}
@@ -468,27 +490,31 @@ public class Classesparse {
 									jmethod.getName().toString());
 							 
 
+							List<Node> methodbody = jmethod.getChildNodes();
+							for (Node node: methodbody)
+							{
+								//System.out.println(node.toString());
+								Statement stm;
+								for(VariableInfo s: jClass.varmap.values())
+								{
+									if(node.toString().contains(s.getName()))
+									{
+										int flag = 1;
+										System.out.println("hello"+s.getName());
+									}
+									
+								}
+							
+							}
+							
 							if (!isGetSetter(jClass, method) && modifier == "+") {
 								//System.out.println("method_Class_Details=>" + method);
 								jClass.addMethod(jmethod.getName().toString(), method);
 								//System.out.println("meth+"+jmethod.getName().toString());
 							}
 							
-							List<Node> methodbody = jmethod.getChildNodes();
-							for (Node node: methodbody)
-							{
-								System.out.println(node.toString());
-								//Statement stm;
-								for(VariableInfo s: jClass.varmap.values())
-								{
-									if(node.toString().contains(s.getName()))
-									{
-										//if()
-										System.out.println("hello"+s.getName());
-									}
-								}
 							
-							}
+							
 							
 							
 							jmethod.getModifiers();
@@ -507,7 +533,15 @@ public class Classesparse {
 							
 							Optional<BlockStmt> blockStmnt = jmethod.getBody();
 							if (blockStmnt != null) {
-	                           
+								String body=blockStmnt.toString();
+	                          System.out.println("method sttement"+ body);
+	                          
+	                          String trylist[]= body.split("=");
+	                          System.out.println("trylist"+trylist);
+	                          //String ab= trylist[0].split(" ")[2];
+	                         // System.out.println(ab);
+	                          
+	                         
 	                        }
 
 						}
