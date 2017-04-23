@@ -52,23 +52,23 @@ public class Classesparse {
 	static Map<String, ClassTemplate> classes = new HashMap<String, ClassTemplate>();
 	Set <String> varrelation= new HashSet<String>();
 	Set <String> varcollection=new HashSet<String>();
-    List<String> DependencyList=new ArrayList<String>();
-    
-   // String outputDir="/Users/shraddhayeole/Desktop/testoutput" + ".png";
-	//String classpath="/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-5";
-	String classpath;
-	String outputDir;
-	
+	List<String> DependencyList=new ArrayList<String>();
 
-	public Classesparse(String classpath,String outputDir) {
+	String outputDir="/Users/shraddhayeole/Desktop/testoutput" + ".png";
+	String classpath="/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-5";
+	//String classpath;
+	//String outputDir;
+
+
+	public Classesparse() {
 		if (classpath == null || outputDir == null || classpath.equals("") || outputDir.equals("")) {
 			usage();
 		}
 		this.classpath = classpath;
 		this.outputDir = outputDir;
-	
+
 	}
-    
+
 	public void usage() {
 		System.out.println("Usage:\njava -jar <classpath> <outputfilename>");
 	}
@@ -127,7 +127,7 @@ public class Classesparse {
 			//System.out.println("s4"+s4);
 			grammer=grammer+ s4+"\n";
 		}
-		
+
 		grammer = grammer+ "\n@enduml";
 		return grammer;
 	}
@@ -139,34 +139,34 @@ public class Classesparse {
 		for(MethodClass m: classModel.getMethods())
 		{
 			for (VariableInfo pVar : m.getParameters().values()) {
-				
+
 				if((pVar.getData_type() instanceof ReferenceType))
 				{
 					if(classes.containsKey(pVar.getData_type().toString()) && classes.get(pVar.getData_type().toString()).isInterface())
 					{	
 						if (classModel.isInterface())
 						{
-							
+
 						}
 						else
-							{
+						{
 							a=classModel.getClass_Name()+"..>"+pVar.getData_type()+":uses";
-							}
+						}
 						if(!DependencyList.contains(a))
-							
-						    DependencyList.add(a);
+
+							DependencyList.add(a);
 					}
-						  
-					}
-					}
-			
-			
-			
+
 				}
 			}
-		
 
-	
+
+
+		}
+	}
+
+
+
 
 
 	public void checkRelationship(ClassTemplate classModel){
@@ -236,7 +236,7 @@ public class Classesparse {
 			}
 			//else if(method.getName().contains("set")  || method.getName().contains("get"))
 			//{
-				//return true;
+			//return true;
 			//}
 		}
 		return false;
@@ -250,8 +250,8 @@ public class Classesparse {
 		if (classModel.isInterface()) {
 			//interfaceList.add(classModel.getClass_Name());
 			grammer = grammer + "interface " + classModel.getClass_Name()+"<<interface>>"+"{";
-			
-			
+
+
 			for (MethodClass method : classModel.getMethods()) {
 
 				if (method.getAccess_modifier().toString().contains("PUBLIC"))
@@ -276,12 +276,12 @@ public class Classesparse {
 
 				}
 
-			
-					grammer = grammer +")"+":"+method.getReturn_type();
-				
+
+				grammer = grammer +")"+":"+method.getReturn_type();
 
 
-			
+
+
 
 			}
 		} else {
@@ -338,12 +338,12 @@ public class Classesparse {
 
 				}
 
-			
+
 				if(method.getReturn_type() != null)
 				{
 					grammer = grammer +")"+":"+method.getReturn_type();
 				}
-				
+
 			}
 
 		}
@@ -455,7 +455,7 @@ public class Classesparse {
 								vi.setAccess_modifier(modifier);
 
 								jClass.varmap.put(vi.getName(), vi);
-								
+
 							}
 
 						}
@@ -484,11 +484,11 @@ public class Classesparse {
 							mi.setAccess_modifier(modifier);
 							System.out.println("modifiers=>"+mi.getAccess_modifier());
 
-							
-							
+
+
 							MethodClass method = new MethodClass(Modifier.getAccessSpecifier(methmod).toString(),jmethod.getType().toString(),
 									jmethod.getName().toString());
-							 
+
 
 							List<Node> methodbody = jmethod.getChildNodes();
 							for (Node node: methodbody)
@@ -502,21 +502,21 @@ public class Classesparse {
 										int flag = 1;
 										System.out.println("hello"+s.getName());
 									}
-									
+
 								}
-							
+
 							}
-							
+
 							if (!isGetSetter(jClass, method) && modifier == "+") {
 								//System.out.println("method_Class_Details=>" + method);
 								jClass.addMethod(jmethod.getName().toString(), method);
 								//System.out.println("meth+"+jmethod.getName().toString());
 							}
-							
-							
-							
-							
-							
+
+
+
+
+
 							jmethod.getModifiers();
 							//jClass.addMethod(MethodClass.getName(), MethodClass);
 							//System.out.println("method class"+MethodClass.getName());
@@ -528,21 +528,35 @@ public class Classesparse {
 
 
 							}
-							
-						
-							
+
+
+							String methodname= jmethod.getName().toString();
+
+							List<Node> methodbody1 = jmethod.getChildNodes();
+
+							if(methodname.equalsIgnoreCase("main"))
+							{
+								for (Node node: methodbody)
+
+								{
+
+								}
+							}
+
 							Optional<BlockStmt> blockStmnt = jmethod.getBody();
 							if (blockStmnt != null) {
 								String body=blockStmnt.toString();
-	                          System.out.println("method sttement"+ body);
-	                          
-	                          String trylist[]= body.split("=");
-	                          System.out.println("trylist"+trylist);
-	                          //String ab= trylist[0].split(" ")[2];
-	                         // System.out.println(ab);
-	                          
-	                         
-	                        }
+								System.out.println("method sttement"+ body);
+
+								// System.out.println(blockStmnt.get()+"statement");
+
+								String trylist[]= body.split("=");
+								System.out.println("trylist"+trylist.toString());
+								//String ab= trylist[0].split(" ")[2];
+								// System.out.println(ab);
+
+
+							}
 
 						}
 
@@ -590,7 +604,6 @@ public class Classesparse {
 
 
 }//classes parse
-
 
 
 
