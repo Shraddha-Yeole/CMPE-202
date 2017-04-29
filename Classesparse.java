@@ -1,3 +1,5 @@
+package javatouml.parsejava;
+
 
 
 import java.awt.image.BufferedImage;
@@ -53,14 +55,16 @@ public class Classesparse {
 	Set <String> varrelation= new HashSet<String>();
 	Set <String> varcollection=new HashSet<String>();
 	List<String> DependencyList=new ArrayList<String>();
+	static List<String> Interface_Dependency= new ArrayList<String>();
+	static List<String> anwfinal=new ArrayList<String>();
+	
+	//String outputDir="/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-5/output" + ".png";
+	//String classpath="/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-5";
+	String classpath;
+	String outputDir;
 
-	String outputDir="/Users/shraddhayeole/Desktop/testoutput" + ".png";
-	String classpath="/Users/shraddhayeole/PARSER/parsejava/src/test/java/javatouml/parsejava/uml-parser-test-5";
-	//String classpath;
-	//String outputDir;
 
-
-	public Classesparse() {
+	public Classesparse(String classpath,String outputDir) {
 		if (classpath == null || outputDir == null || classpath.equals("") || outputDir.equals("")) {
 			usage();
 		}
@@ -124,7 +128,7 @@ public class Classesparse {
 
 		for(String s4:DependencyList)
 		{
-			//System.out.println("s4"+s4);
+			System.out.println("s4"+s4);
 			grammer=grammer+ s4+"\n";
 		}
 
@@ -136,6 +140,7 @@ public class Classesparse {
 	public void checkDependency(ClassTemplate classModel){
 
 		String a="";
+		String b="";
 		for(MethodClass m: classModel.getMethods())
 		{
 			for (VariableInfo pVar : m.getParameters().values()) {
@@ -159,9 +164,22 @@ public class Classesparse {
 
 				}
 			}
+			//System.out.println("checkmain"+m.getName());
 
+			if(m.getName().equals("main"))
+			{
+				b=anwfinal.get(0);
+				System.out.println("bbbbb"+b);
+				DependencyList.add(b);
+				
+			}
 
-
+		}
+		
+		
+		for (MethodClass m1: classModel.getMethods())
+		{
+			
 		}
 	}
 
@@ -249,6 +267,8 @@ public class Classesparse {
 		String modifier = "", mGrammer = "";
 		if (classModel.isInterface()) {
 			//interfaceList.add(classModel.getClass_Name());
+			Interface_Dependency.add(classModel.getClass_Name());
+			
 			grammer = grammer + "interface " + classModel.getClass_Name()+"<<interface>>"+"{";
 
 
@@ -396,14 +416,22 @@ public class Classesparse {
 
 
 				List<ClassOrInterfaceType> implementz = n.getImplementedTypes();
+				
+				
 				for (int i = 0; i < implementz.size(); i++) {
 					jClass.addInterface(implementz.get(i).getName().toString());
-					//System.out.println("implement--"+implementz.get(i).getName().toString());
+					if(!Interface_Dependency.contains(implementz.get(i).getName().toString()))
+							{
+						Interface_Dependency.add(implementz.get(i).getName().toString());
+							}
+					
+					System.out.println("implement--"+implementz.get(i).getName().toString());
+					System.out.println("Interface list after implement"+Interface_Dependency);
 					//System.out.println(implement);
 				}
 				//System.out.println("----------------------------");
 				System.out.println("\n"+"ClassName=>" + n.getName().toString()); 
-				//System.out.println("interfacelist"+interfaceList);
+				System.out.println("Interface list"+Interface_Dependency);
 				List<BodyDeclaration<?>> bDeclrs = n.getMembers();
 				Type l1 = null;
 				String v4 = null;
@@ -532,26 +560,50 @@ public class Classesparse {
 
 							String methodname= jmethod.getName().toString();
 
-							List<Node> methodbody1 = jmethod.getChildNodes();
+							//List<Node> methodbody1 = jmethod.getChildNodes();
 
 							if(methodname.equalsIgnoreCase("main"))
 							{
 								for (Node node: methodbody)
 
+								
 								{
-
+									System.out.println("node"+node);
+									//node.toString().contains()
+									
+									
+					        		
+					        			for (String i: Interface_Dependency)
+					        			{
+					        				if (node.toString().contains(i))
+					        				{	
+					        					//a=classModel.getClass_Name()+"..>"+pVar.getData_type()+":uses";
+					        					String dp = n.getName().toString()+ " ..> " +i +":uses";
+					        					System.out.println("dp"+dp);
+					        					anwfinal.add(dp);
+					        					System.out.println("anwsdd "+anwfinal.get(0));
+					        					
+					        				}
+					        			}
+					        		
+									//System.out.println("checkcheck"+implementz.get(i));
+									//node.toString().contains(ClassTemplate.refervariable.contains(classes.keySet());
 								}
-							}
+								}
+							
 
 							Optional<BlockStmt> blockStmnt = jmethod.getBody();
 							if (blockStmnt != null) {
 								String body=blockStmnt.toString();
-								System.out.println("method sttement"+ body);
-
+								//System.out.println("method sttement"+ body);
+								
 								// System.out.println(blockStmnt.get()+"statement");
-
+								if(body.equalsIgnoreCase("main"))
+								{
+									System.out.println(body);
+								}
 								String trylist[]= body.split("=");
-								System.out.println("trylist"+trylist.toString());
+								//System.out.println("trylist"+trylist.toString());
 								//String ab= trylist[0].split(" ")[2];
 								// System.out.println(ab);
 
@@ -593,17 +645,14 @@ public class Classesparse {
 				//System.out.println(jClass.refvarmap.values());
 
 			}
-			//System.out.println(n.getName().toString());
+			
+
+		}
+	}
 
 
-			//System.out.println("mapval--->>"+Arrays.asList(classes));
-			//System.out.println(classes.values());
+}
 
-		}//void visit
-	}//class visitor
-
-
-}//classes parse
 
 
 
